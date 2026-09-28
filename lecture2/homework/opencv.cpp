@@ -8,20 +8,23 @@ int main()
     // 初始化相机、yolo类
     Camera my_cam;
     auto_aim:: YOLO s("../configs/yolo.yaml") ;
-    std:: cout <<"hello,world"<<std::endl;
     while (1) {
         // 调用相机读取图像
         
         unsigned int nMsec = 100;
         cv::Mat img = my_cam.read(nMsec);
         if (img.empty()) {
-            continue; // 如果图像为空，跳过
+            continue; 
         }
-        // 调用yolo识别opencv标志
+        
+        //cv::cvtColor(img, gray_img, cv::COLOR_BGR2GRAY);
+        
         auto  armors = s.detect(img);
 
+        //cv::Mat display_img;
+        //cv::cvtColor(gray_img, display_img, cv::COLOR_GRAY2BGR);
         if (!armors.empty()) 
-        { // 💡 非常重要：一定要判断是否为空，否则后续取数据会崩溃
+        { 
             for (const auto& armor : armors)    
             { 
                 cv::Point2f top_left = armor.points[0];
@@ -33,10 +36,12 @@ int main()
                 cv::Point2f I_need = top_center + half_left_diff; 
                 //std::cout<<armor.points<<std::endl;
                 cv::Point text_pos(static_cast<int>(I_need.x), static_cast<int>(I_need.y));
-                std::string info = armor.color + armor.name;
+                std::string color_str =auto_aim:: COLORS[armor.color];
+                std::string armor_str = auto_aim::ARMOR_NAMES[armor.name];
+                std::string info =  color_str + " " + armor_str  ;
 
-                tools::draw_points(img, armor.points, {0, 255, 0}); // 画装甲板关键点
-                tools::draw_text(img, ,info, text_pos, {0, 255, 0});  
+                tools::draw_points(img, armor.points, {0, 255, 0},3); // 画装甲板关键点
+                tools::draw_text(img, info, text_pos, {0, 255, 0});  
                 std::cout << "识别到一个装甲板！" << std::endl;
             }
         } 
@@ -46,16 +51,14 @@ int main()
 
         cv::resize(img, img , cv::Size(640, 480));
         cv::imshow("img", img);
-        if (cv::waitKey(0) == 'q') 
-            break;
-        
-        // 显示图像
+
         // cv::resize(img, img , cv::Size(640, 480));
         // cv::imshow("img", img);
-        // if (cv::waitKey(0) == 'q') {
-        //     // break;
-        // }
-    // }
+        if (cv::waitKey(1) == 'q') {
+                 break;
+        }
+
+    }
 
     return 0;
 }
