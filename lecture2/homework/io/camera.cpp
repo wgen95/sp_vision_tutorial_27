@@ -44,14 +44,14 @@ cv::Mat Camera::read(unsigned int nMsec)
     MV_FRAME_OUT raw;
     int ret = MV_CC_GetImageBuffer(handle_, &raw, nMsec);
     if (ret != MV_OK) {
-        return ;   
+        return  cv::Mat();   
     }
     
     cv::Mat img =  transfer(raw);
 
     ret = MV_CC_FreeImageBuffer(handle_, &raw);
     if (ret != MV_OK) {
-      return;
+      return cv::Mat();
     }
     return img;
 }

@@ -1,12 +1,13 @@
 #include "io/camera.hpp"
 #include "tasks/yolo.hpp"
+#include<iostream>
 #include "opencv2/opencv.hpp"
 #include "tools/img_tools.hpp"
-
+using namespace tools;
 int main()
 {
-    // 初始化相机、yolo类
-    
+    // 初始化相机、yolo类s
+
     // while (1) {
         // 调用相机读取图像
 
