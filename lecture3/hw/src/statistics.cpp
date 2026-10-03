@@ -1,12 +1,16 @@
 #include "statistics.hpp"
-
+#include <mutex>
 #include <chrono>
 #include <thread>
 
 namespace
 {
+    
+
     void deliberatelySlowIncrement(int &value)
     {
+        static std::mutex value_mutex;
+        std::lock_guard<std::mutex>safaguard (value_mutex);
         // This delay makes the race observable on small homework inputs.
         const int old = value;
         std::this_thread::sleep_for(std::chrono::microseconds(100));
