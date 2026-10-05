@@ -19,8 +19,9 @@ public:
   {
     this->declare_parameter("reliability", "reliable");
     this->declare_parameter("depth", 10);
-    this->declare_parameter("callback_delay_ms", 30);
-
+    this->declare_parameter("callback_delay_ms", 5);//之前的30太慢了，会丢失信息。试了试10，也会丢，就改成5好了。
+    //ros2 param list /sensor_subscriber
+    //ros2 param dump /sensor_subscriber 两个命令查看延迟
     reliability_ = this->get_parameter("reliability").as_string();
     depth_ = this->get_parameter("depth").as_int();
     callback_delay_ms_ = this->get_parameter("callback_delay_ms").as_int();
@@ -121,17 +122,31 @@ private:
 
   void report()
   {
+    const auto now = std::chrono::steady_clock::now();
+    const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - last_report_time_).count();
+    const uint32_t received_since_last = received_count_ - last_received_count_;
+    const double fps = elapsed > 0 ? static_cast<double>(received_since_last) / elapsed : 0.0;
+
     const uint64_t total = static_cast<uint64_t>(received_count_) + lost_count_;
     const double loss_rate = (total == 0) ? 0.0 : 100.0 * lost_count_ / total;
     RCLCPP_INFO(
         this->get_logger(),
         "累计: 收到 %u 条, 丢失 %u 条, 丢包率 %.2f%%",
         received_count_, lost_count_, loss_rate);
-
-    /*
-    在这之间加入计算帧率并打印的代码
-
+    
+      /*
+    在这之间加入计算帧率并打印的代码    
     */
+   //我自己没想通要怎么计算帧率，ai提示后明白了，就是把一次报告的时间提取，与上一次的时间相减
+   //还有就是把收到的消息数提取出来，与上一次的消息数相减
+   //我没有看清楚这个函数是在private里面的，能调用自己的成员这一点，没想到要怎么算帧率。
+   //用上成员received_count_和题目要求使用的last_received_count_，计算帧率很简单。
+    RCLCPP_INFO(
+        this->get_logger(),
+        "帧率: %.2f Hz,最近一秒收到了 %u 条消息",
+        fps,received_since_last);
+    last_report_time_ = now;
+    last_received_count_ = received_count_;
   }
 
   rclcpp::Subscription<nav_hw_interfaces::msg::SensorData>::SharedPtr subscription_;

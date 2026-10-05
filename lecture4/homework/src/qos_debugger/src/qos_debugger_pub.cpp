@@ -14,7 +14,11 @@ public:
     SensorPublisher()
         : Node("sensor_publisher")
     {
-        this->declare_parameter("reliability", "best_effort");
+        this->declare_parameter("reliability", "reliable");//修改处
+        //用到的命令  ros2 pkg executables qos_debugger
+        //得到了节点的名称
+        //然后两个终端分别执行 ros2 run qos_debugger qos_debugger_pub
+        //                   ros2 run qos_debugger qos_debugger_sub
         this->declare_parameter("depth", 10);
         this->declare_parameter("rate", 100.0);
 
